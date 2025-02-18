@@ -1,9 +1,13 @@
 {
-  "name": "adminforth-google-oauth-adapter",
+  "name": "@adminforth/google-oauth-adapter",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc && npm version patch",
+    "rollout": "npm run build && npm publish --access public",
+    "prepare": "npm link adminforth"
   },
   "keywords": [],
   "author": "",

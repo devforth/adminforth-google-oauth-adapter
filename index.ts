@@ -1,6 +1,6 @@
 import type { OAuth2Adapter } from "adminforth";
 
-export class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
+export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
     private clientID: string;
     private clientSecret: string;
     private redirectUri: string;

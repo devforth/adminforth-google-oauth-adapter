@@ -3,22 +3,18 @@ import type { OAuth2Adapter } from "adminforth";
 export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
     private clientID: string;
     private clientSecret: string;
-    private redirectUri: string;
-  
+
     constructor(options: {
       clientID: string;
       clientSecret: string;
-      redirectUri: string;
     }) {
       this.clientID = options.clientID;
       this.clientSecret = options.clientSecret;
-      this.redirectUri = options.redirectUri;
     }
   
     getAuthUrl(): string {
       const params = new URLSearchParams({
         client_id: this.clientID,
-        redirect_uri: this.redirectUri,
         response_type: 'code',
         scope: 'openid email profile',
         access_type: 'offline'
@@ -27,8 +23,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       return url;
     }
   
-    async getTokenFromCode(code: string): Promise<{ email: string; name?: string; picture?: string }> {
-      
+    async getTokenFromCode(code: string, redirect_uri: string): Promise<{ email: string;}> {
       // Exchange code for token
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
@@ -37,7 +32,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
           code,
           client_id: this.clientID,
           client_secret: this.clientSecret,
-          redirect_uri: this.redirectUri,
+          redirect_uri,
           grant_type: 'authorization_code',
         }),
       });

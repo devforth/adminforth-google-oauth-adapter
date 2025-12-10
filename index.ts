@@ -26,7 +26,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     }
   
-    async getTokenFromCode(code: string, redirect_uri: string): Promise<{ email: string;}> {
+    async getTokenFromCode(code: string, redirect_uri: string): Promise<{ email: string, fullName?: string; picture?: string }> {
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -68,6 +68,8 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
 
       return {
         email: userData.email,
+        fullName: userData.name,
+        picture: userData.picture
       };
     }
 

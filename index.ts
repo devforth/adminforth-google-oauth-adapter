@@ -26,7 +26,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     }
   
-    async getTokenFromCode(code: string, redirect_uri: string): Promise<{ email: string, fullName?: string; picture?: string }> {
+    async getTokenFromCode(code: string, redirect_uri: string): Promise<{ email: string, fullName?: string; profilePictureUrl?: string }> {
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -49,7 +49,11 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
         try {
           const decodedToken: any = jwtDecode(tokenData.id_token);
           if (decodedToken.email) {
-            return { email: decodedToken.email };
+            return { 
+              email: decodedToken.email,
+              fullName: decodedToken.name,
+              profilePictureUrl: decodedToken.picture
+            };
           }
         } catch (error) {
           console.error("Error decoding token:", error);
@@ -69,7 +73,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       return {
         email: userData.email,
         fullName: userData.name,
-        picture: userData.picture
+        profilePictureUrl: userData.picture
       };
     }
 

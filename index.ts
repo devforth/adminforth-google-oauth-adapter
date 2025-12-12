@@ -5,15 +5,17 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
     private clientID: string;
     private clientSecret: string;
     private useOpenID: boolean;
+    private useOpenIdConnect: boolean;
 
     constructor(options: {
       clientID: string;
       clientSecret: string;
       useOpenID?: boolean;
+      useOpenIdConnect?: boolean;
     }) {
       this.clientID = options.clientID;
       this.clientSecret = options.clientSecret;
-      this.useOpenID = options.useOpenID ?? true;
+      this.useOpenIdConnect = (options.useOpenIdConnect || options.useOpenID) ?? true;
     }
   
     getAuthUrl(): string {
@@ -45,7 +47,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
         console.error('Token error:', tokenData);
         throw new Error(tokenData.error_description || tokenData.error);
       }
-      if (this.useOpenID && tokenData.id_token) {
+      if (this.useOpenIdConnect && tokenData.id_token) {
         try {
           const decodedToken: any = jwtDecode(tokenData.id_token);
           if (decodedToken.email) {

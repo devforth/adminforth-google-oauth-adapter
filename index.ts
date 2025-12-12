@@ -15,7 +15,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
     }) {
       this.clientID = options.clientID;
       this.clientSecret = options.clientSecret;
-      this.useOpenIdConnect = (options.useOpenIdConnect || options.useOpenID) ?? true;
+      this.useOpenIdConnect = (!!options.useOpenIdConnect || !!options.useOpenID) ?? true;
     }
   
     getAuthUrl(): string {

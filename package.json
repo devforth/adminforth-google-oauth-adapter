@@ -5,7 +5,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc && npm version patch",
+    "build": "tsc",
     "rollout": "npm run build && npm publish --access public"
   },
   "keywords": [],

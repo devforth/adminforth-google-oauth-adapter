@@ -1,5 +1,5 @@
 {
-  "name": "@adminforth/google-oauth-adapter",
+  "name": "@adminforth/oauth-adapter-google",
   "version": "1.0.17",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -36,7 +36,7 @@
       [
         "semantic-release-slack-bot",
         {
-          "packageName": "@adminforth/google-oauth-adapter",
+          "packageName": "@adminforth/oauth-adapter-google",
           "notifyOnSuccess": true,
           "notifyOnFail": true,
           "slackIcon": ":package:",

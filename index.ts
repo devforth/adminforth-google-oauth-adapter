@@ -1,6 +1,16 @@
 import type { OAuth2Adapter } from "adminforth";
-import { jwtDecode } from "jwt-decode";
 
+type OAuth2UserInfoLocal = {
+  email: string;
+  provider?: string;
+  subject?: string;
+  phone?: string;
+  meta?: Record<string, any>;
+  fullName?: string;
+  profilePictureUrl?: string;
+  externalUserId?: string | number | null;
+};
+import { jwtDecode } from "jwt-decode";
 export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
     private clientID: string;
     private clientSecret: string;
@@ -28,7 +38,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     }
   
-    async getTokenFromCode(code: string, redirect_uri: string): Promise<{ email: string, fullName?: string; profilePictureUrl?: string }> {
+    async getTokenFromCode(code: string, redirect_uri: string): Promise<OAuth2UserInfoLocal> {
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -51,7 +61,9 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
         try {
           const decodedToken: any = jwtDecode(tokenData.id_token);
           if (decodedToken.email) {
-            return { 
+            return {
+              provider: this.constructor.name, 
+              subject: decodedToken.sub,
               email: decodedToken.email,
               fullName: decodedToken.name,
               profilePictureUrl: decodedToken.picture
@@ -73,10 +85,16 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       }
 
       return {
+        provider: this.constructor.name,
+        subject: userData.id,
         email: userData.email,
         fullName: userData.name,
         profilePictureUrl: userData.picture
       };
+    }
+
+    getName(): string {
+      return 'Google';
     }
 
     getIcon(): string {

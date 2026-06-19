@@ -1,20 +1,12 @@
-import type { OAuth2Adapter } from "adminforth";
+import type { OAuth2Adapter, OAuth2UserInfo } from "adminforth";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
-type OAuth2UserInfoLocal = {
-  email: string;
-  provider?: string;
-  subject?: string;
-  phone?: string;
-  meta?: Record<string, any>;
-  fullName?: string;
-  profilePictureUrl?: string;
-  externalUserId?: string | number | null;
-};
-import { jwtDecode } from "jwt-decode";
+const GOOGLE_ISSUERS = ["https://accounts.google.com", "accounts.google.com"];
+const googleJWKS = createRemoteJWKSet(new URL("https://www.googleapis.com/oauth2/v3/certs"));
+
 export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
     private clientID: string;
     private clientSecret: string;
-    private useOpenID: boolean;
     private useOpenIdConnect: boolean;
 
     constructor(options: {
@@ -38,7 +30,7 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
     }
   
-    async getTokenFromCode(code: string, redirect_uri: string): Promise<OAuth2UserInfoLocal> {
+    async getTokenFromCode(code: string, redirect_uri: string): Promise<OAuth2UserInfo> {
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -59,18 +51,24 @@ export default class AdminForthAdapterGoogleOauth2 implements OAuth2Adapter {
       }
       if (this.useOpenIdConnect && tokenData.id_token) {
         try {
-          const decodedToken: any = jwtDecode(tokenData.id_token);
-          if (decodedToken.email) {
+          const { payload } = await jwtVerify(tokenData.id_token, googleJWKS, {
+            issuer: GOOGLE_ISSUERS,
+            audience: this.clientID,
+            algorithms: ["RS256"],
+          });
+
+          if (typeof payload.email === 'string') {
             return {
               provider: this.constructor.name, 
-              subject: decodedToken.sub,
-              email: decodedToken.email,
-              fullName: decodedToken.name,
-              profilePictureUrl: decodedToken.picture
+              subject: payload.sub,
+              email: payload.email,
+              fullName: typeof payload.name === 'string' ? payload.name : undefined,
+              profilePictureUrl: typeof payload.picture === 'string' ? payload.picture : undefined
             };
           }
         } catch (error) {
-          console.error("Error decoding token:", error);
+          console.error("Error verifying token:", error);
+          throw error;
         }
       }
   
